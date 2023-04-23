@@ -1,40 +1,70 @@
-import './App.css'
-import Product from './component/Product/Product';
-// import Product from "./component/Product/Product"
-const App=()=>{
-  return( 
-    // const car=100
+import { useState } from "react";
+import Footer from "./components/Footer";
+import Input from "./components/input/input";
+import TaskList from "./components/TaskList/TaskList";
+import { get, save } from "./repositories/TodoRepository";
 
-    // <>
-    //   <header style={{
-    //     display:"flex",
-    //     backgroundColor: "#40eb34",
-    //     alignItems: "center",
-    //     justifyContent: "space-between"
-    //   }}>
-    //   <h1>Shopping cart {3+6}</h1>
-    //   <h1>{"Car".toUpperCase()} number  {car}</h1>
-    //   </header>
-    //   <main>
-    //   <Product title={"iphone 14 pro max"} price ="1500" />
-    //   <Product title={"iphone 13 pro max"} price ="2000" />
-    //   <Product  title={"Sam Sung 14 pro max"} price ="3000" />  
-    //   <Product title={"Huawei 14 pro max"} price ="4000" />
-    //   <Product title={"Xiaomi 14 pro max"} price ="1000" />    
-    //   <Product />
+function App() {
+  const [todos, setTodos] = useState(get());
+  const [title, setTitle] = useState("");
+  const onSubmit = (title) => {
+    let newTodos = [
+      {
+        title: title,
+        status: false,
+      },
+      ...(todos ?? []),
+    ];
+    setTodos(newTodos);
+    save(newTodos);
+    setTitle("");
+  };
 
-    //   </main>
-    // </>
-    <div className="container" >
-      <div className="input w-52  ">
-      <input type="text" placeholder='Enter your task here...' />
+  const onChangeTitle = (value) => {
+    setTitle(value);
+  };
+
+  const onCompleteTask = ({ title, status }) => {
+    let newTodos = todos.map((todo) => {
+      if (todo.title === title) {
+        todo.status = status;
+      }
+      return todo;
+    });
+    setTodos(newTodos);
+  };
+
+
+
+  const onDeleteTask = (index) => {
+    todos.splice(index, 1);
+    setTodos([...todos]);
+    save(todos);
+  };
+
+
+  return (
+    <div className="flex h-[100vh] justify-center items-center">
+      <div className="mx-auto w-2/4 bg-white  p-6">
+        <div className="w-full">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              onSubmit(title);
+            }}
+          >
+            <Input onChangeInput={onChangeTitle} value={title} />
+          </form>
+        </div>
+        <TaskList
+          todos={todos}
+          onCompleteTask={onCompleteTask}
+          onDeleteTask={onDeleteTask}
+        />
+        <Footer countTodo={todos?.length} />
       </div>
     </div>
-
   );
-
-
-  
-
 }
+
 export default App;
